@@ -1,18 +1,19 @@
-Healthcare Management System
-Project Purpose
+#Healthcare Management System
+#Project Purpose
 
 The Healthcare Management System is a Python console application designed to represent basic healthcare operations using object-oriented programming concepts.
 
-Problem Being Addressed
+#Problem Being Addressed
 
 Healthcare organisations need to manage information about employees, patients, departments, and medical appointments. This project demonstrates how these entities can be represented and managed using programming concepts.
 
-Technologies Used
-Python
-Object-Oriented Programming
-UML
-File Handling
-Main Features
+#Technologies Used
+-Python
+-Object-Oriented Programming
+-UML
+-File Handling
+
+#Main Features
 Create and manage healthcare employees
 Represent different employee roles
 Use inheritance between classes
