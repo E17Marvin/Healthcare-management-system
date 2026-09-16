@@ -10,18 +10,28 @@ Healthcare organisations need to manage information about employees, patients, d
 
 # Technologies Used
 -Python
+
 -Object-Oriented Programming
+
 -UML
+
 -File Handling
 
 # Main Features
 -Create and manage healthcare employees
+
 -Represent different employee roles
+
 -Use inheritance between classes
+
 -Manage patients
+
 -Manage medical appointments
+
 -Store and retrieve information using files
+
 -Display information through a console application
+
 -Demonstrate polymorphism
 
 # How to Run
