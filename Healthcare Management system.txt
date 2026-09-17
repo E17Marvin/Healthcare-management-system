@@ -1,0 +1,245 @@
+import json
+import os
+
+COUNTER_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "employee_count.json")
+
+def load_employee_count():
+    if os.path.exists(COUNTER_FILE):
+        with open(COUNTER_FILE, "r") as f:
+            data = json.load(f)
+            HealthCareEmployee.total_employees = data.get("total_employees", 0)
+
+def save_employee_count():
+    with open(COUNTER_FILE, "w") as f:
+        json.dump({"total_employees": HealthCareEmployee.total_employees}, f)
+
+class HealthCareEmployee:
+    total_employees = 0  # Class variable to keep track of total employees
+    def __init__(self, name: str, employeeID: str, salary: float):
+        self.name = name
+        self.employeeID = employeeID
+        self.salary = salary
+        self.department = None
+        HealthCareEmployee.total_employees += 1
+
+    def display_info(self):
+        print(f"Name: {self.name}")
+        print(f"Employee ID: {self.employeeID}")
+        print(f"Salary: N${self.salary:.2f}")
+
+   #( @classmethod
+    #def get_employee_count(cls):
+     #  return f"Total employees: {cls.total_employees}"
+    
+# this is a doctor class inherits name, employeeID, and the salary from the HealthCareEmployee
+class Doctor(HealthCareEmployee):
+    def __init__(self, name: str, employeeID: str, salary: float, specialty: str):
+        super().__init__(name, employeeID, salary)
+        self.specialty = specialty
+    def work(self):
+        print(f"{self.name} is a doctor specializing in {self.specialty}.")
+
+#nurse class  inherits name, employeeID, and the salary from the HealthCareEmployee
+class Nurse(HealthCareEmployee):
+    def __init__(self, name:str, employeeID: str, salary:float, shift: str):
+        super().__init__(name, employeeID, salary)
+        self.shift = shift
+    # an  overide method 
+    def work(self):
+        print(f"{self.name} is a nurse on the {self.shift} shift.")
+
+
+class Department:
+    def __init__(self, name: str):
+        self.name = name
+        self.employees = []
+
+    def add_employee(self, employee: HealthCareEmployee):
+        # it checking if the employee already exist in employees(list)
+        if employee not in self.employees:
+            self.employees.append(employee)
+            employee.department = self
+
+    def display_staff(self):
+        print(f"Department: {self.name}")
+        for employee in self.employees:
+            print(f"- {employee.name} ({employee.__class__.__name__})")
+
+class Patient:
+    def __init__(self, name: str, patientID:str, age: int):
+        self.name = name
+        self.patientID = patientID
+        self.age = age
+        self.appointments = []
+
+    def add_appointment(self, appointment):
+        if appointment not in self.appointments:
+            self.appointments.append(appointment)
+
+    def display_info(self):
+        print(f"Patient Name: {self.name}")
+        print(f"Patient ID: {self.patientID}")
+        print(f"Age: {self.age}")
+        print(f"Appointments: {len(self.appointments)}")
+
+
+class Appointment:
+    def __init__(self, appointmentID: str,patient: Patient,doctor: Doctor,date: str,
+                  diagnosis: str, treatment: str, notes: str = "" ):
+        self.appointmentID = appointmentID
+        self.patient = patient
+        self.doctor = doctor
+        self.date = date
+        self.diagnosis = diagnosis
+        self.treatment = treatment
+        self.notes = notes
+        #forming a relationship between  appointment class and patient class
+        # thruogh add_appointment method 
+        patient.add_appointment(self)
+
+    def display_info(self):
+        print(f"Appointment ID: {self.appointmentID}")
+        print(f"Date: {self.date}")
+        print(f"Patient: {self.patient.name}")
+        print(f"Doctor: {self.doctor.name}")
+        print(f"Diagnosis: {self.diagnosis}")
+        print(f"Treatment: {self.treatment}")
+        print(f"Notes: {self.notes}")
+# Main program
+# creating these methods that we can use to create and prompt object values (attributes)
+# to make these methods works properly they must check some coditions 
+# also handling some errors from user inputs 
+def get_required_input(prompt: str):
+    while True:
+        value = input(prompt).strip()
+        if value:
+            return value
+        print("This field is required. Please enter a value.")
+
+# decimal values tamplet
+def get_positive_float(prompt: str):
+    while True:
+        try:
+            value = float(get_required_input(prompt))
+            if value >= 0:
+                return value
+        except ValueError:
+            pass
+        print("Please try to enter a valid non-negative number.")
+
+# postive values tamplet 
+def get_positive_int(prompt: str):
+    while True:
+        try:
+            value = int(get_required_input(prompt))
+            if value >= 0:
+                return value
+        except ValueError:
+            pass
+        print("Please enter a valid non-negative whole number.")
+
+# create method that creates appointment that inherits some attributes from Patient class and doctor class
+#  values must be INPUT(prompting) format 
+def create_appointment(patient: Patient, doctor: Doctor):
+    appointment = Appointment(
+        appointmentID=get_required_input("Appointment ID: "), # making sure that appointment ID is a string
+        patient=patient, # from patient class
+        doctor=doctor,   # from doctor class 
+        date=get_required_input("Appointment date: "),
+        diagnosis=get_required_input("Diagnosis: "),
+        treatment=get_required_input("Treatment: "),
+        notes=get_required_input("Medical notes: "),
+    )
+    print("Appointment added successfully.\n")
+    return appointment
+
+# we need to create a kind of a file where evrything executed can be saved in 
+# the file must be called hospital_recods.txt
+# the program can write(write mode) into the file
+
+def save_records(department: Department, patient: Patient, filename: str = "hospital_records.txt"):
+    import os
+    filepath = os.path.join(os.path.dirname(os.path.abspath(__file__)), filename)
+    print("SAVING TO:", filepath)
+    with open(filepath, "a", encoding="utf-8") as file:
+        file.write("\n" + "="*40 + "\n")
+        file.write("Hospital Records\n")
+        file.write("================\n\n")
+        file.write(f"Department: {department.name}\n")
+        file.write("Staff:\n")
+        for employee in department.employees:
+            file.write(f"- {employee.__class__.__name__}: {employee.name}\n")
+            file.write(f"  Employee ID: {employee.employeeID}\n")
+            file.write(f"  Salary: N${employee.salary:.2f}\n")
+
+            if isinstance(employee, Doctor):
+                file.write(f"  Specialty: {employee.specialty}\n")
+            elif isinstance(employee, Nurse):
+                file.write(f"  Shift: {employee.shift}\n")
+
+        file.write(f"Total employees ever created (all-time): {HealthCareEmployee.total_employees}\n")
+        file.write("\nPatient\n")
+        file.write(f"Name: {patient.name}\n")
+        file.write(f"Patient ID: {patient.patientID}\n")
+        file.write(f"Age: {patient.age}\n")
+
+        for appointment in patient.appointments:
+            file.write("\nAppointment\n")
+            file.write(f"Appointment ID: {appointment.appointmentID}\n")
+            file.write(f"Date: {appointment.date}\n")
+            file.write(f"Doctor: {appointment.doctor.name}\n")
+            file.write(f"Diagnosis: {appointment.diagnosis}\n")
+            file.write(f"Treatment: {appointment.treatment}\n")
+            file.write(f"Notes: {appointment.notes}\n")
+def read_records():
+    import os
+    filepath = os.path.join(os.path.dirname(os.path.abspath(__file__)), "hospital_records.txt")
+    with open(filepath, "r", encoding="utf-8") as file:
+        print(file.read())
+
+ # Main program
+def main():
+    load_employee_count() 
+    print("Hospital Management System")
+    print("Enter doctor details")
+    doctor = Doctor(
+        get_required_input("Doctor name: "),
+        get_required_input("Doctor employee ID: "),
+        get_positive_float("Doctor salary: "),
+        get_required_input("Doctor specialty: "),
+    )
+
+    print("\nEnter nurse details")
+    nurse = Nurse(
+        get_required_input("Nurse name: "),
+        get_required_input("Nurse employee ID: "),
+        get_positive_float("Nurse salary: "),
+        get_required_input("Nurse shift: "),
+    )
+
+    department = Department(get_required_input("\nDepartment name: "))
+    department.add_employee(doctor)
+    department.add_employee(nurse)
+
+    print("\nEnter patient details")
+    patient = Patient(
+        get_required_input("Patient name: "),
+        get_required_input("Patient ID: "),
+        get_positive_int("Patient age: "),
+    )
+
+    print("\nEnter the first appointment")
+    create_appointment(patient, doctor)
+
+    while input("Add another appointment for this patient? (y/n): ").strip().lower() == "y":
+        print("\nEnter another appointment")
+        create_appointment(patient, doctor)
+
+    save_records(department, patient)
+    print(f"Total employees ever created (all-time): {HealthCareEmployee.total_employees}")
+    print("\nRecords saved to hospital_records.txt")
+    save_employee_count()  
+
+
+if __name__ == "__main__":
+    main()
